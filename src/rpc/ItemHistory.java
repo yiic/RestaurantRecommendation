@@ -2,6 +2,7 @@ package rpc;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.ArrayList;
 
 import javax.servlet.ServletException;
@@ -14,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import db.MySQLConnection;
+import entity.Item;
 
 /**
  * Servlet implementation class ItemHistory
@@ -34,8 +36,24 @@ public class ItemHistory extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		response.getWriter().append("Served at: ").append(request.getContextPath());
+		MySQLConnection connection = new MySQLConnection();
+		try {
+			String userId = request.getParameter("user_id");
+			Set<Item> favoritedItems = connection.getFavoriteItems(userId);
+			
+			JSONArray array = new JSONArray();
+			for (Item item : favoritedItems) {
+				JSONObject obj = item.toJSONObject();
+				obj.put("favorite", true);
+				array.put(obj);
+			}
+			RpcHelper.writeJsonArray(response, array);;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			connection.close();
+		}	
+
 	}
 
 	/**

@@ -49,6 +49,9 @@ public class Item {
 	public String getUrl() {
 		return url;
 	}
+	public String getImageUrl() {
+		return imageUrl;
+	}
 
 	public double getDistance() {
 		return distance;

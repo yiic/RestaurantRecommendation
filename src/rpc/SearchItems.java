@@ -1,6 +1,7 @@
 package rpc;
 
 import java.util.List;
+import java.util.Set;
 import java.io.IOException;
 import java.io.PrintWriter;
 import org.json.JSONObject;
@@ -31,16 +32,20 @@ public class SearchItems extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException { 
 		double lat = Double.parseDouble(request.getParameter("lat"));
-		double lon = Double.parseDouble(request.getParameter("lon"));		
+		double lon = Double.parseDouble(request.getParameter("lon"));	
+		String userId = request.getParameter("user_id");
 		// Term can be empty or null.
 		String term = request.getParameter("term");
 		MySQLConnection connection = new MySQLConnection();
 		try {
 			List<Item> items = connection.searchItems(lat, lon, term);
+			Set<String> favoriteItemIds = connection.getFavoriteItemIds(userId);
 
 			JSONArray array = new JSONArray();
 			for (Item item : items) {
-				array.put(item.toJSONObject());
+				JSONObject obj = item.toJSONObject();
+				obj.put("favorite", favoriteItemIds.contains(item.getItemId()));
+				array.put(obj);
 			}
 			RpcHelper.writeJsonArray(response, array);
 
